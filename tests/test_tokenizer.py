@@ -71,15 +71,15 @@ def test_tokenizer_raises_error_on_garbage():
         list(Tokenizer("$"))
 
 #so tokenizer can recognise each token type seperately
-def tokenizer_recognises_each_token(code: str, token: Token):
+@pytest.mark.parametrize(
+    ["code", "token"],
+    [
+        ("+", Token(TokenType.PLUS)),
+        ("-", Token(TokenType.MINUS)),
+        ("3", Token(TokenType.INT, 3)),
+    ],
+)
+def test_tokenizer_recognises_each_token(code: str, token: Token):
     tokens = list(Tokenizer(code))
     assert tokens == [token, Token(TokenType.EOF)]
 
-def test_tokenizer_knows_plus():
-    tokenizer_recognises_each_token("+", Token(TokenType.PLUS))
-
-def test_tokenizer_knows_minus():
-    tokenizer_recognises_each_token("-", Token(TokenType.MINUS))
-
-def test_tokenizer_knows_integer():
-    tokenizer_recognises_each_token("3", Token(TokenType.INT, 3))
