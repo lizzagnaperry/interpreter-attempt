@@ -1,0 +1,10 @@
+README.md
+pyproject.toml
+src/python/parser.py
+src/python/tokenizer.py
+src/python.egg-info/PKG-INFO
+src/python.egg-info/SOURCES.txt
+src/python.egg-info/dependency_links.txt
+src/python.egg-info/top_level.txt
+tests/test_parser.py
+tests/test_tokenizer.py

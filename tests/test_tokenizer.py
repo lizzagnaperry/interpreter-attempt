@@ -1,5 +1,5 @@
-from tokenizer import Token, Tokenizer, TokenType
 import pytest
+from python.tokenizer import Token, Tokenizer, TokenType
 
 #test addition
 def test_tokenizer_addition(): 
