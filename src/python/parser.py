@@ -8,11 +8,12 @@ class TreeNode:
     pass
 
 #subclass for addition and subtraction akak the binary operations
+#left and right are treenodes cuz either side of a binop could be another binop
 @dataclass
 class BinOp(TreeNode):
     op: str
-    left: "Int"
-    right: "Int"
+    left: "TreeNode"
+    right: "TreeNode"
 
 #nodetype for the integers
 @dataclass
@@ -39,33 +40,68 @@ class Parser:
         peek_at = self.next_token_index + skip
         return self.tokens[peek_at].type if peek_at < len(self.tokens) else None
 
-    #parses the program
-    def parse(self) -> BinOp:
-        #if parsing + and - then need to have integers
-        left_op = self.eat(TokenType.INT)
-
-        #if we have + or -
-        if self.peek() == TokenType.PLUS:
-            op = "+"
-            self.eat(TokenType.PLUS)
-        else:
-            op = "-"
-            self.eat(TokenType.MINUS)
-
-        #after eating op token we can expect a new int
-        right_op = self.eat(TokenType.INT)
-
+    #parses the whole program
+    def parse(self) -> TreeNode:
+        tree = self.parse_expression()
         self.eat(TokenType.EOF)
+        return tree
 
-        #return and build tree node
-        return BinOp(op, Int(left_op.value), Int(right_op.value))
+    #lowest precedence: + and -
+    #parses one term, then keeps folding in more +/- terms as long as
+    #they appear, building left chain of the binosp
+    def parse_expression(self) -> TreeNode:
+        left = self.parse_term()
+ 
+        while self.peek() in (TokenType.PLUS, TokenType.MINUS):
+            if self.peek() == TokenType.PLUS:
+                op = "+"
+                self.eat(TokenType.PLUS)
+            else:
+                op = "-"
+                self.eat(TokenType.MINUS)
+ 
+            right = self.parse_term()
+            left = BinOp(op, left, right)
+ 
+        return left
+
+    #higher precedence: * and /
+    #works on factors instead of terms
+    #"2 + 3 * 4" makes binds the * tighter than the +
+    def parse_term(self) -> TreeNode:
+        left = self.parse_factor()
+ 
+        while self.peek() in (TokenType.STAR, TokenType.SLASH):
+            if self.peek() == TokenType.STAR:
+                op = "*"
+                self.eat(TokenType.STAR)
+            else:
+                op = "/"
+                self.eat(TokenType.SLASH)
+ 
+            right = self.parse_factor()
+            left = BinOp(op, left, right)
+ 
+        return left
+
+    #highest precedence: a single number, or a parenthesized expression
+    #the parens let you "reset" back to the top of the precedence chain,
+    #lets "(2 + 3) * 4" overrides normal precedence
+    def parse_factor(self) -> TreeNode:
+        if self.peek() == TokenType.LPAREN:
+            self.eat(TokenType.LPAREN)
+            expr = self.parse_expression()
+            self.eat(TokenType.RPAREN)
+            return expr
+ 
+        token = self.eat(TokenType.INT)
+        return Int(token.value)
+
 
 #testinggggg
 if __name__ == "__main__":
     from src.python.tokenizer import Tokenizer
 
-    code = "3 + 5"
+    code = "3 + 5 - 2 * (4 - 1)"
     parser = Parser(list(Tokenizer(code)))
     print(parser.parse())
-
-    # BinOp(op='+', left=Int(value=3), right=Int(value=5))

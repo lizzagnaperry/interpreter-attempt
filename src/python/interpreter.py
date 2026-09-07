@@ -40,6 +40,11 @@ class Interpreter:
                     result = left + right
                 elif bc.value == "-":
                     result = left - right
+                elif bc.value == "*":
+                    result = left * right
+                elif bc.value == "/":
+                    #integer division, since our language only has ints
+                    result = left // right
                 else:
                     raise RuntimeError(f"Unknown operator {bc.value}.")
                 self.stack.push(result)
